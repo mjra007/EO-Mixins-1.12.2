@@ -75,7 +75,8 @@ processResources {
 }
 
 dependencies {
-	compile name: 'Baubles-1.12-1.5.2-dev'
+	compileOnly fileTree(dir: 'libs', include: ['*.jar'])       //Current Folder Libs
+	compileOnly fileTree(dir: '../libs', include: ['*.jar'])
 }
 
 task devJar(type: Jar) {
