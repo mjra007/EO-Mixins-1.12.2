@@ -1,4 +1,4 @@
-package uk.enchantedoasis.eomixins.mixins.hats; ;
+package uk.enchantedoasis.eomixins.hats.mixins; ;
 
 import me.ichun.mods.hats.common.Hats;
 import me.ichun.mods.hats.common.core.ProxyCommon;
@@ -9,14 +9,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import uk.enchantedoasis.eomixins.EOMixins;
+
 
 @Mixin(value = ProxyCommon.class, remap = false)
 public abstract class MixinProxyCommon{
 
     @Inject(method={"preInitMod"}, at=@At("HEAD"))
     public void preInitMod(CallbackInfo ci){
-        EOMixins.logger.info("[EOMixins] Registering entity hats:hat to be able to add it to the list of entities entityculling mod doesnt cull.");
+        System.out.println("[EOMixins] Registering entity hats:hat to be able to add it to the list of entities entityculling mod doesnt cull.");
         final ResourceLocation registryName = new ResourceLocation(Hats.MOD_NAME, "hat");
         EntityRegistry.registerModEntity(registryName, EntityHat.class, registryName.toString(), 0, Hats.instance, 50, 5, true);
     }

@@ -1,0 +1,4 @@
+rootProject.name = 'EO-Mixins1.12.2'
+
+include 'Mixin-Hats'
+include 'Mixin-Template'
