@@ -1,138 +1,75 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-
 buildscript {
-    repositories {
-        mavenCentral()
+	repositories {
+		mavenCentral()
 		maven {
 			name = "Forge"
 			url = 'https://files.minecraftforge.net/maven'
 		}
 		maven {
-            name = 'spongepowered-repo'
-            url = 'https://repo.spongepowered.org/repository/maven-public/'
-        }
-		maven {
-			name = "sonatype"
-			url = "https://oss.sonatype.org/content/repositories/snapshots/"
+			name = 'spongepowered-repo'
+			url = 'https://repo.spongepowered.org/repository/maven-public/'
 		}
-        maven {
-            name = "github"
-            url = "https://github.com/juanmuscaria/maven/raw/master"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle2:[2.3-1.0.0-SNAPSHOT,)'
+		maven {
+			name = "github"
+			url = "https://github.com/juanmuscaria/maven/raw/master"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle2:[2.3-1.0.0-SNAPSHOT,)'
 		classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
 		classpath 'com.integral.grimoire:GrimoireShenanigans:[1.5.3,)'
-    }
+	}
 }
 
-
-allprojects {
-	apply plugin: 'java'
+repositories {
+	flatDir {
+		dirs 'deps'
+	}
 }
 
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'grimoire-shenanigans'
 
-task clean_dist_folder(type: Delete){
-	delete "${rootDir}/dist"
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+sourceSets {
+	main {
+		ext.refMap = mixinRefmapName
+	}
 }
 
-subprojects {
+minecraft {
+	version = "1.12.2-14.23.5.2847"
+	mappings = "snapshot_20171003"
+	runDir = "eclipse"
 
-	repositories {
-		flatDir {
-			dirs 'deps'
-		}
-	}
-
-	apply plugin: 'idea'
-	apply plugin: 'maven-publish'
-	apply plugin: 'net.minecraftforge.gradle.forge'
-	apply plugin: 'org.spongepowered.mixin'
-	apply plugin: 'grimoire-shenanigans'
-
-	sourceSets {
-		main {
-			ext.refMap = project.archivesBaseName+".refmap.json";
-		}
-	}
-
-	minecraft {
-		version = "1.12.2-14.23.4.2705"
-		mappings = "stable_39"
-		runDir = 'run'
-		replace '@VERSION@', project.version
-		// makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-	}
-
-	group = 'uk.enchantedoasis.eomixins'
-	[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
-
-	repositories {
-		maven {
-			name = 'spongepowered-repo'
-			url = 'https://repo.spongepowered.org/maven/'
-		}
-		mavenCentral()
-	}
-
-	dependencies {
-		compile "org.spongepowered:mixin:0.8.1-SNAPSHOT"
-		compileOnly 'org.jetbrains:annotations:16.0.2'
-		compileOnly fileTree(dir: 'libs', include: ['*.jar'])
-	}
-
-	task build_them_all {
-		dependsOn clean_dist_folder
-		dependsOn build
-		doLast {
-			def baseName = project.archivesBaseName
-			def version = project.version
-			def group = project.group
-			def DIST_DIR = "${rootDir}/dist"
-			def SRC_DIR = "${buildDir}/libs"
-
-			ant.mkdir(dir: DIST_DIR)
-			ant.copy(todir: DIST_DIR) {
-				fileset(dir: SRC_DIR,
-						includes: "${baseName}*.jar,${baseName}*.jar")
-			}
-		}
-	}
-
-
-	task devJar(type: Jar) {
-		classifier = 'dev'
-		from sourceSets.main.output
-	}
-
-	task sourcesJar(type: Jar) {
-		classifier = 'sources'
-		from sourceSets.main.allSource
-	}
-
-	artifacts {
-		archives devJar
-		archives sourcesJar
-	}
-
-	//Intelij IDEAL has a "BUG" that hides
-	// theses functions bellow from the
-	// subprojects gradle. Altering them
-	// make them reapear
-
-	tasks.build.doFirst {
-		println "EO-Mixins1.12.2 BuildProject"
-	}
-
-	tasks.clean.doFirst {
-		println "EO-Mixins1.12.2 CleanProject!"
-	}
+	replace '@VERSION@', project.version
+	// makeObfSourceJar = false
 }
 
 
 dependencies {
-	compileOnly fileTree(dir: 'libs', include: ['*.jar'])       //Current Folder Libs
+	implementation 'org.jetbrains:annotations:20.1.0'
+    compileOnly fileTree(dir: 'libs', include: ['*.jar'])       //Current Folder Libs
 	compileOnly fileTree(dir: '../libs', include: ['*.jar'])
+}
+
+task devJar(type: Jar) {
+	classifier = 'dev'
+	from sourceSets.main.output
+}
+
+task sourcesJar(type: Jar) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+artifacts {
+	archives devJar
+	archives sourcesJar
 }
